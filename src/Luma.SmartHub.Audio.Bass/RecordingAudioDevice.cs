@@ -11,7 +11,10 @@ namespace Luma.SmartHub.Audio.Bass
             return $"Id = {Id}\n" +
                    $"Name = {Name}\n" +
                    $"Type = {DeviceInfo.Type}\n" +
-                   $"Driver = {DeviceInfo.Driver}";
+                   $"Driver = {DeviceInfo.Driver}\n" +
+                   $"IsDefault = {DeviceInfo.IsDefault}\n" +
+                   $"IsEnabled = {DeviceInfo.IsEnabled}\n" +
+                   $"IsInitialized = {DeviceInfo.IsInitialized}";
         }
     }
 }
