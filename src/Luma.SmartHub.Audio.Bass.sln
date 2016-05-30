@@ -15,6 +15,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".build", ".build", "{3967EF
 		..\build.ps1 = ..\build.ps1
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{66383FBC-82B2-46E4-8683-7FF9B81DF604}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luma.SmartHub.Audio.Bass.Tests", "Luma.SmartHub.Audio.Bass.Tests\Luma.SmartHub.Audio.Bass.Tests.csproj", "{495C0EFB-B35D-4D74-BBF4-CBC8444728EB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -25,8 +29,15 @@ Global
 		{840D9E4A-1A4C-48F4-8CB8-B54EB7892A4F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{840D9E4A-1A4C-48F4-8CB8-B54EB7892A4F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{840D9E4A-1A4C-48F4-8CB8-B54EB7892A4F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{495C0EFB-B35D-4D74-BBF4-CBC8444728EB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{495C0EFB-B35D-4D74-BBF4-CBC8444728EB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{495C0EFB-B35D-4D74-BBF4-CBC8444728EB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{495C0EFB-B35D-4D74-BBF4-CBC8444728EB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{495C0EFB-B35D-4D74-BBF4-CBC8444728EB} = {66383FBC-82B2-46E4-8683-7FF9B81DF604}
 	EndGlobalSection
 EndGlobal

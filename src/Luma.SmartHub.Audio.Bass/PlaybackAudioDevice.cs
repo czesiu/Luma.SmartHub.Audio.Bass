@@ -6,6 +6,12 @@ namespace Luma.SmartHub.Audio.Bass
     {
         public PlaybackDevice PlaybackDevice { get; set; }
 
+        public double Volume
+        {
+            get { return PlaybackDevice.Volume; }
+            set { PlaybackDevice.Volume = value; }
+        }
+
         public override string ToString()
         {
             return $"Id = {Id}\n" +
