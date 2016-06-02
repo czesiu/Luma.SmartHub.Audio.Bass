@@ -44,12 +44,12 @@
     <Compile Include="RecordingAudioDevice.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="Luma.SmartHub, Version=0.0.30.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Luma.SmartHub.0.0.30\lib\portable45-net45+win8\Luma.SmartHub.dll</HintPath>
+    <Reference Include="Luma.SmartHub, Version=0.0.31.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Luma.SmartHub.0.0.31\lib\portable45-net45+win8\Luma.SmartHub.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="Luma.SmartHub.Audio, Version=0.0.30.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\Luma.SmartHub.Audio.0.0.30\lib\portable45-net45+win8\Luma.SmartHub.Audio.dll</HintPath>
+    <Reference Include="Luma.SmartHub.Audio, Version=0.0.31.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\Luma.SmartHub.Audio.0.0.31\lib\portable45-net45+win8\Luma.SmartHub.Audio.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="ManagedBass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">

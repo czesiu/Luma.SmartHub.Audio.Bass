@@ -53,7 +53,7 @@ namespace Luma.SmartHub.Audio.Bass.Tests
             while (true)
             {
                 Console.Clear();
-                Console.WriteLine(playback.Write());
+                Console.WriteLine(((Playback)playback).Write());
 
                 Thread.Sleep(100);
             }

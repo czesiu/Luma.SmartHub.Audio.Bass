@@ -2,13 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using Luma.SmartHub.Audio.Bass.Extensions;
+using Luma.SmartHub.Audio.Playback;
 using ManagedBass;
 using ManagedBass.Mix;
 
 namespace Luma.SmartHub.Audio.Bass
 {
-    public class Playback : IDisposable
+    public class Playback : IPlayback, IDisposable
     {
+        public string Id { get; }
+        
+        public bool IsPlaying { get; private set; }
+
         private readonly List<Channel> _outputChannels = new List<Channel>();
         private readonly Channel _sourceChannel;
 
@@ -16,6 +21,36 @@ namespace Luma.SmartHub.Audio.Bass
         {
             _sourceChannel = sourceChannel;
             _sourceChannel.Position = 0;
+        }
+
+        public void Play()
+        {
+            var channel = _outputChannels.FirstOrDefault();
+
+            if (channel?.Start() == true)
+            {
+                IsPlaying = true;
+            }
+        }
+
+        public void Pause()
+        {
+            var channel = _outputChannels.FirstOrDefault();
+
+            if (channel?.Pause() == true)
+            {
+                IsPlaying = false;
+            }
+        }
+        
+        public void Stop()
+        {
+            var channel = _outputChannels.FirstOrDefault();
+
+            if (channel?.Stop() == true)
+            {
+                IsPlaying = false;
+            }
         }
 
         public void AddOutgoingConnection(IAudioDevice audioDevice)
@@ -55,14 +90,6 @@ namespace Luma.SmartHub.Audio.Bass
             }
         }
 
-        public void Play()
-        {
-            var channel = _outputChannels.FirstOrDefault();
-
-            IsPlaying = channel?.Start() ?? false;
-        }
-
-        public bool IsPlaying { get; set; }
 
         public string Write()
         {
@@ -92,6 +119,7 @@ namespace Luma.SmartHub.Audio.Bass
 
             splitterChannel.Dispose();
         }
+
 
         public void Dispose()
         {

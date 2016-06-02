@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ManagedBass;
 using Luma.SmartHub.Audio.Bass.Extensions;
+using Luma.SmartHub.Audio.Playback;
 using ManagedBass.Mix;
 
 namespace Luma.SmartHub.Audio.Bass
@@ -35,7 +36,7 @@ namespace Luma.SmartHub.Audio.Bass
             }
         }
 
-        public Playback CreatePlayback(Uri uri)
+        public IPlayback CreatePlayback(Uri uri)
         {
             return new Playback(new NetworkChannel(uri.ToString(), IsDecoder: true));
         }
@@ -68,6 +69,12 @@ namespace Luma.SmartHub.Audio.Bass
 
                 return _volume.Value;
             }
+            set
+            {
+                _volume = value;
+
+                SetDevicesVolume(value);
+            }
         }
 
         private double UnifyDevicesVolume()
@@ -84,6 +91,18 @@ namespace Luma.SmartHub.Audio.Bass
             }
 
             return volume;
+        }
+
+        private void SetDevicesVolume(double volume)
+        {
+            var playbackDevices = Devices
+                .OfType<PlaybackAudioDevice>()
+                .ToArray();
+
+            foreach (var playbackAudioDevice in playbackDevices)
+            {
+                playbackAudioDevice.Volume = volume;
+            }
         }
     }
 }
