@@ -38,7 +38,10 @@ namespace Luma.SmartHub.Audio.Bass
 
         public IPlayback CreatePlayback(Uri uri)
         {
-            return new Playback(new NetworkChannel(uri.ToString(), IsDecoder: true));
+            var url = uri.ToString();
+            var urlEscaped = Uri.EscapeUriString(url);
+
+            return new Playback(new NetworkChannel(urlEscaped, IsDecoder: true));
         }
 
         public void Play(string url, IAudioDevice device = null)
