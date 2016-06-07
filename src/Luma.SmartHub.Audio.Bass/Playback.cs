@@ -5,27 +5,56 @@ using Luma.SmartHub.Audio.Bass.Extensions;
 using Luma.SmartHub.Audio.Playback;
 using ManagedBass;
 using ManagedBass.Mix;
+using ManagedBass.Tags;
 
 namespace Luma.SmartHub.Audio.Bass
 {
     public class Playback : IPlayback, IDisposable
     {
         public string Id { get; }
-        
+        public double Volume { get; set; }
+        public string Name { get; set; }
+
         public bool IsPlaying { get; private set; }
 
-        private readonly List<Channel> _outputChannels = new List<Channel>();
-        private readonly Channel _sourceChannel;
+        ICollection<IOutputAudioDevice> OutgoingConnections { get; }
+
+        IEnumerable<IOutputAudioDevice> IPlayback.OutgoingConnections => OutgoingConnections;
+
+        public event EventHandler Ended;
+
+        protected readonly List<Channel> OutputChannels = new List<Channel>();
+        protected Channel SourceChannel;
 
         public Playback(Channel sourceChannel)
         {
-            _sourceChannel = sourceChannel;
-            _sourceChannel.Position = 0;
+            Id = Guid.NewGuid().ToString();
+
+            SourceChannel = sourceChannel;
+            SourceChannel.Position = 0;
+            SourceChannel.MediaEnded += OnMediaEnded;
+            OutgoingConnections = new HashSet<IOutputAudioDevice>();
+
+            var networkChannel = sourceChannel as NetworkChannel;
+            if (networkChannel != null)
+            {
+                networkChannel.DownloadComplete += () =>
+                {
+                    var tags = TagReader.Read(networkChannel.Handle);
+
+                    Name = $"{tags.Artist} - {tags.Title}";
+                };
+            }
+        }
+
+        private void OnMediaEnded(object sender, EventArgs eventArgs)
+        {
+            Ended?.Invoke(sender, eventArgs);
         }
 
         public void Play()
         {
-            var channel = _outputChannels.FirstOrDefault();
+            var channel = OutputChannels.FirstOrDefault();
 
             if (channel?.Start() == true)
             {
@@ -35,7 +64,7 @@ namespace Luma.SmartHub.Audio.Bass
 
         public void Pause()
         {
-            var channel = _outputChannels.FirstOrDefault();
+            var channel = OutputChannels.FirstOrDefault();
 
             if (channel?.Pause() == true)
             {
@@ -45,7 +74,7 @@ namespace Luma.SmartHub.Audio.Bass
         
         public void Stop()
         {
-            var channel = _outputChannels.FirstOrDefault();
+            var channel = OutputChannels.FirstOrDefault();
 
             if (channel?.Stop() == true)
             {
@@ -53,35 +82,37 @@ namespace Luma.SmartHub.Audio.Bass
             }
         }
 
-        public void AddOutgoingConnection(IAudioDevice audioDevice)
+        public void AddOutgoingConnection(IOutputAudioDevice audioDevice)
         {
             var playbackDevice = audioDevice.AsPlayback();
 
             playbackDevice.Init();
 
-            var splitterChannel = new SplitChannel(_sourceChannel)
+            var splitterChannel = new SplitChannel(SourceChannel)
             {
                 Device = playbackDevice
             };
 
-            foreach (var outputChannel in _outputChannels)
+            foreach (var outputChannel in OutputChannels)
             {
                 outputChannel.Link(splitterChannel.Handle);
                 splitterChannel.Link(outputChannel.Handle);
             }
 
-            _outputChannels.Add(splitterChannel);
+            OutputChannels.Add(splitterChannel);
+            
+            OutgoingConnections.Add(audioDevice);
 
             if (IsPlaying)
             {
-                var position = _outputChannels.Min(c => c.Position);
+                var position = OutputChannels.Min(c => c.Position);
 
-                foreach (var outputChannel in _outputChannels)
+                foreach (var outputChannel in OutputChannels)
                 {
                     outputChannel.Pause();
                 }
 
-                foreach (var outputChannel in _outputChannels)
+                foreach (var outputChannel in OutputChannels)
                 {
                     outputChannel.Position = position;
                 }
@@ -93,9 +124,9 @@ namespace Luma.SmartHub.Audio.Bass
 
         public string Write()
         {
-            var result = $"Position = {_sourceChannel.Position}\n";
+            var result = $"Position = {SourceChannel.Position}\n";
 
-            foreach (var outputChannel in _outputChannels)
+            foreach (var outputChannel in OutputChannels)
             {
                 result += $"Position = {outputChannel.Position}\n";
             }
@@ -103,19 +134,21 @@ namespace Luma.SmartHub.Audio.Bass
             return result;
         }
 
-        public void RemoveOutgoingConnection(IAudioDevice audioDevice)
+        public void RemoveOutgoingConnection(IOutputAudioDevice audioDevice)
         {
             var playbackDevice = audioDevice.AsPlayback();
 
-            var splitterChannel = _outputChannels.Single(c => c.Device == playbackDevice);
+            var splitterChannel = OutputChannels.Single(c => c.Device == playbackDevice);
 
-            _outputChannels.Remove(splitterChannel);
+            OutputChannels.Remove(splitterChannel);
 
-            foreach (var outputChannel in _outputChannels)
+            foreach (var outputChannel in OutputChannels)
             {
                 ManagedBass.Bass.ChannelRemoveLink(splitterChannel.Handle, outputChannel.Handle);
                 ManagedBass.Bass.ChannelRemoveLink(outputChannel.Handle, splitterChannel.Handle);
             }
+
+            OutgoingConnections.Remove(audioDevice);
 
             splitterChannel.Dispose();
         }
@@ -123,9 +156,9 @@ namespace Luma.SmartHub.Audio.Bass
 
         public void Dispose()
         {
-            foreach (var outputChannel1 in _outputChannels)
+            foreach (var outputChannel1 in OutputChannels)
             {
-                foreach (var outputChannel2 in _outputChannels)
+                foreach (var outputChannel2 in OutputChannels)
                 {
                     if (outputChannel1 != outputChannel2)
                     {
@@ -136,7 +169,8 @@ namespace Luma.SmartHub.Audio.Bass
                 outputChannel1.Dispose();
             }
 
-            _sourceChannel.Dispose();
+            SourceChannel.MediaEnded -= OnMediaEnded;
+            SourceChannel.Dispose();
         }
     }
 }

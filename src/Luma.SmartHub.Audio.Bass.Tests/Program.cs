@@ -9,7 +9,7 @@ namespace Luma.SmartHub.Audio.Bass.Tests
     {
         static void Main(string[] args)
         {
-            PlayOnAllDevices("http://www.stephaniequinn.com/Music/Commercial%20DEMO%20-%2009.mp3");
+            PlayOnAllDevices("http://czesio-w-it.2ap.pl/wp-content/uploads/2016/a.mp3");
             Console.ReadKey();
         }
 

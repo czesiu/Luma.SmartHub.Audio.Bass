@@ -4,7 +4,6 @@ using System.Linq;
 using ManagedBass;
 using Luma.SmartHub.Audio.Bass.Extensions;
 using Luma.SmartHub.Audio.Playback;
-using ManagedBass.Mix;
 
 namespace Luma.SmartHub.Audio.Bass
 {

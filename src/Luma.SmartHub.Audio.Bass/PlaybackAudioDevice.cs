@@ -2,7 +2,7 @@
 
 namespace Luma.SmartHub.Audio.Bass
 {
-    public class PlaybackAudioDevice : AudioDevice
+    public class PlaybackAudioDevice : AudioDevice, IOutputAudioDevice
     {
         public PlaybackDevice PlaybackDevice { get; set; }
 
