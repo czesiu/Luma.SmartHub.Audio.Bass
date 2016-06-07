@@ -12,7 +12,13 @@ namespace Luma.SmartHub.Audio.Bass
     public class Playback : IPlayback, IDisposable
     {
         public string Id { get; }
-        public double Volume { get; set; }
+
+        public double Volume
+        {
+            get { return SourceChannel.Volume; }
+            set { SourceChannel.Volume = value; }
+        }
+
         public string Name { get; set; }
 
         public bool IsPlaying { get; private set; }

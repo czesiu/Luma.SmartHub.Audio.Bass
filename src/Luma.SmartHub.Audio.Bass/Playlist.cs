@@ -10,8 +10,15 @@ namespace Luma.SmartHub.Audio.Bass
         private IPlayback _currentTrack;
         
         public string Id { get; }
-        public double Volume { get; set; }
         public string Name { get; set; }
+
+        // TODO: Add valid implementation - this is temporary
+        public double Volume
+        {
+            get { return CurrentTrack.Volume; }
+            set { CurrentTrack.Volume = value; }
+        }
+
         public IList<IPlayback> Tracks { get; }
 
         public bool IsPlaying => CurrentTrack?.IsPlaying == true;

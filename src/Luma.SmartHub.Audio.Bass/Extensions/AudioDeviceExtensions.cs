@@ -10,6 +10,7 @@ namespace Luma.SmartHub.Audio.Bass.Extensions
             return new PlaybackAudioDevice
             {
                 Id = $"{AudioDevices.Output}-{playbackDevice.DeviceIndex}",
+                Name = playbackDevice.DeviceInfo.Name,
                 Type = AudioDevices.Output,
                 DeviceInfo = playbackDevice.DeviceInfo,
                 PlaybackDevice = playbackDevice
