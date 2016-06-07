@@ -36,6 +36,7 @@
   <ItemGroup>
     <Compile Include="AudioDevice.cs" />
     <Compile Include="AudioHub.cs" />
+    <Compile Include="AudioPlayer.cs" />
     <Compile Include="Extensions\AudioDeviceExtensions.cs" />
     <Compile Include="DeviceOutputNode.cs" />
     <Compile Include="Playback.cs" />
