@@ -9,14 +9,21 @@ using ManagedBass.Tags;
 
 namespace Luma.SmartHub.Audio.Bass
 {
-    public class Playback : IPlayback, IDisposable
+    public abstract class Playback : IPlayback, IDisposable
     {
         public string Id { get; }
+        public double? Duration { get; }
 
         public double Volume
         {
             get { return SourceChannel.Volume; }
             set { SourceChannel.Volume = value; }
+        }
+
+        public double Position
+        {
+            get { return SourceChannel.Position; }
+            set { SourceChannel.Position = value; }
         }
 
         public string Name { get; set; }
@@ -30,18 +37,40 @@ namespace Luma.SmartHub.Audio.Bass
         public event EventHandler Ended;
 
         protected readonly List<Channel> OutputChannels = new List<Channel>();
-        protected Channel SourceChannel;
+
+        private Channel _sourceChannel;
+
+        protected Channel SourceChannel
+        {
+            get { return _sourceChannel; }
+            set
+            {
+                if (_sourceChannel == value)
+                    return;
+
+                _sourceChannel = value;
+
+                OnSourceChannelChanged();
+            }
+        }
+
+        public Playback()
+        {
+            Id = Guid.NewGuid().ToString();
+            OutgoingConnections = new HashSet<IOutputAudioDevice>();
+        }
 
         public Playback(Channel sourceChannel)
         {
-            Id = Guid.NewGuid().ToString();
-
             SourceChannel = sourceChannel;
+        }
+
+        private void OnSourceChannelChanged()
+        {
             SourceChannel.Position = 0;
             SourceChannel.MediaEnded += OnMediaEnded;
-            OutgoingConnections = new HashSet<IOutputAudioDevice>();
 
-            var networkChannel = sourceChannel as NetworkChannel;
+            var networkChannel = SourceChannel as NetworkChannel;
             if (networkChannel != null)
             {
                 networkChannel.DownloadComplete += () =>
@@ -120,6 +149,8 @@ namespace Luma.SmartHub.Audio.Bass
 
                 foreach (var outputChannel in OutputChannels)
                 {
+                    // Set position twice, because sometimes isn't working
+                    outputChannel.Position = position;
                     outputChannel.Position = position;
                 }
 

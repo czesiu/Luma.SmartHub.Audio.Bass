@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Luma.SmartHub.Audio.Playback;
 
 namespace Luma.SmartHub.Audio.Bass.Tests
 {
@@ -15,7 +16,8 @@ namespace Luma.SmartHub.Audio.Bass.Tests
 
         private static void PlayOnAllDevices(string url)
         {
-            var audioHub = new AudioHub();
+            var playbackManager = new PlaybackManager(new IPlaybackInfoProvider[0]);
+            var audioHub = new AudioHub(playbackManager);
 
             var allDevices = audioHub.Devices
                 .OfType<PlaybackAudioDevice>()

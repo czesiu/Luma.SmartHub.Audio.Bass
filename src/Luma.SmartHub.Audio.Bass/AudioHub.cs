@@ -9,6 +9,7 @@ namespace Luma.SmartHub.Audio.Bass
 {
     public class AudioHub : IAudioHub
     {
+        private readonly IPlaybackManager _playbackManager;
         private List<IAudioDevice> _devices;
         public IList<IAudioDevice> Devices
         {
@@ -35,28 +36,14 @@ namespace Luma.SmartHub.Audio.Bass
             }
         }
 
-        public IPlayback CreatePlayback(Uri uri)
+        public AudioHub(IPlaybackManager playbackManager)
         {
-            var url = uri.ToString();
-            var urlEscaped = Uri.EscapeUriString(url);
-
-            return new Playback(new NetworkChannel(urlEscaped, IsDecoder: true));
+            _playbackManager = playbackManager;
         }
 
-        public void Play(string url, IAudioDevice device = null)
+        public IUriPlayback CreatePlayback(Uri uri)
         {
-            var playbackDevice = device?.AsPlayback();
-
-            playbackDevice?.Init();
-
-            var player = new NetworkChannel(url);
-
-            if (playbackDevice != null)
-            {
-                player.Device = playbackDevice;
-            }
-
-            player.Start();
+            return new UriPlayback(_playbackManager, uri);
         }
 
         private double? _volume;

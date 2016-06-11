@@ -8,8 +8,16 @@ namespace Luma.SmartHub.Audio.Bass
     public class Playlist : IPlaylist
     {
         private IPlayback _currentTrack;
-        
+
         public string Id { get; }
+        public double? Duration => Tracks.Sum(c => c.Duration);
+
+        public double Position
+        {
+            get { return Tracks.IndexOf(CurrentTrack); }
+            set { GoToIndex((int)value); }
+        }
+
         public string Name { get; set; }
 
         // TODO: Add valid implementation - this is temporary
@@ -54,13 +62,12 @@ namespace Luma.SmartHub.Audio.Bass
             newTrack?.Play();
         }
 
-        public Playlist(IList<Uri> tracks)
-            : this(tracks.ToPlaybackList()) { }
+        public Playlist(IList<Uri> tracks, IPlaybackManager playbackManager)
+            : this(tracks.ToPlaybackList(playbackManager)) { }
 
         public Playlist(IList<IPlayback> tracks = null)
         {
             Id = Guid.NewGuid().ToString();
-
             Tracks = tracks ?? new List<IPlayback>();
             OutgoingConnections = new HashSet<IOutputAudioDevice>();
         }
