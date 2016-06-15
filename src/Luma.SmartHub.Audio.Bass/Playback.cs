@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Luma.SmartHub.Audio.Bass.Extensions;
 using Luma.SmartHub.Audio.Playback;
 using ManagedBass;
@@ -60,11 +61,6 @@ namespace Luma.SmartHub.Audio.Bass
             OutgoingConnections = new HashSet<IOutputAudioDevice>();
         }
 
-        public Playback(Channel sourceChannel)
-        {
-            SourceChannel = sourceChannel;
-        }
-
         private void OnSourceChannelChanged()
         {
             SourceChannel.Position = 0;
@@ -73,18 +69,8 @@ namespace Luma.SmartHub.Audio.Bass
             var networkChannel = SourceChannel as NetworkChannel;
             if (networkChannel != null)
             {
-                networkChannel.DownloadComplete += () =>
-                {
-                    var tags = TagReader.Read(networkChannel.Handle);
-
-                    Name = $"{tags.Artist} - {tags.Title}";
-                };
+                networkChannel.DownloadComplete += OnDownloadComplete;
             }
-        }
-
-        private void OnMediaEnded(object sender, EventArgs eventArgs)
-        {
-            Ended?.Invoke(sender, eventArgs);
         }
 
         public void Play()
@@ -106,7 +92,7 @@ namespace Luma.SmartHub.Audio.Bass
                 IsPlaying = false;
             }
         }
-        
+
         public void Stop()
         {
             var channel = OutputChannels.FirstOrDefault();
@@ -135,7 +121,7 @@ namespace Luma.SmartHub.Audio.Bass
             }
 
             OutputChannels.Add(splitterChannel);
-            
+
             OutgoingConnections.Add(audioDevice);
 
             if (IsPlaying)
@@ -149,16 +135,18 @@ namespace Luma.SmartHub.Audio.Bass
 
                 foreach (var outputChannel in OutputChannels)
                 {
-                    // Set position twice, because sometimes isn't working
-                    outputChannel.Position = position;
-                    outputChannel.Position = position;
+                    // Set position few times, because sometimes once isn't working
+                    var i = 5;
+                    while (i-- > 0)
+                    {
+                        outputChannel.Position = position;
+                    }
                 }
 
                 Play();
             }
         }
-
-
+        
         public string Write()
         {
             var result = $"Position = {SourceChannel.Position}\n";
@@ -193,7 +181,9 @@ namespace Luma.SmartHub.Audio.Bass
 
         public void Dispose()
         {
-            foreach (var outputChannel1 in OutputChannels)
+            Stop();
+            
+            foreach (var outputChannel1 in OutputChannels.ToArray())
             {
                 foreach (var outputChannel2 in OutputChannels)
                 {
@@ -203,11 +193,36 @@ namespace Luma.SmartHub.Audio.Bass
                     }
                 }
 
+                OutputChannels.Remove(outputChannel1);
+
                 outputChannel1.Dispose();
+            }
+
+            OutgoingConnections.Clear();
+
+            var networkChannel = SourceChannel as NetworkChannel;
+            if (networkChannel != null)
+            {
+                networkChannel.DownloadComplete -= OnDownloadComplete;
             }
 
             SourceChannel.MediaEnded -= OnMediaEnded;
             SourceChannel.Dispose();
+        }
+
+        private void OnDownloadComplete()
+        {
+            var tags = TagReader.Read(SourceChannel.Handle);
+
+            Name = $"{tags.Artist} - {tags.Title}";
+        }
+
+        private void OnMediaEnded(object sender, EventArgs eventArgs)
+        {
+            if (Ended == null)
+                return;
+
+            Task.Factory.StartNew(() => Ended?.Invoke(this, EventArgs.Empty));
         }
     }
 }

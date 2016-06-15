@@ -9,7 +9,7 @@ namespace Luma.SmartHub.Audio.Bass
 {
     public class AudioHub : IAudioHub
     {
-        private readonly IPlaybackManager _playbackManager;
+        private readonly IPlaybackInfoProvider _playbackInfoProvider;
         private List<IAudioDevice> _devices;
         public IList<IAudioDevice> Devices
         {
@@ -36,14 +36,14 @@ namespace Luma.SmartHub.Audio.Bass
             }
         }
 
-        public AudioHub(IPlaybackManager playbackManager)
+        public AudioHub(IPlaybackInfoProvider playbackInfoProvider)
         {
-            _playbackManager = playbackManager;
+            _playbackInfoProvider = playbackInfoProvider;
         }
 
         public IUriPlayback CreatePlayback(Uri uri)
         {
-            return new UriPlayback(_playbackManager, uri);
+            return new UriPlayback(_playbackInfoProvider, uri);
         }
 
         private double? _volume;

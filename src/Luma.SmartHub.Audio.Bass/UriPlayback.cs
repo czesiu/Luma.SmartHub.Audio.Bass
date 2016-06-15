@@ -8,12 +8,12 @@ namespace Luma.SmartHub.Audio.Bass
     {
         public Uri Uri { get; }
 
-        public UriPlayback(IPlaybackManager playbackManager, Uri uri)
+        public UriPlayback(IPlaybackInfoProvider playbackInfoProvider, Uri uri)
         {
             Uri = uri;
 
             var targetUri = uri;
-            var playbackInfo = playbackManager.TryGetPlaybackInfo(uri);
+            var playbackInfo = playbackInfoProvider.Get(uri);
             if (playbackInfo != null)
             {
                 Name = playbackInfo.Name;

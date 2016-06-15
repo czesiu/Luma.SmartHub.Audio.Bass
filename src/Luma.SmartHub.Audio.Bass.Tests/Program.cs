@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Luma.SmartHub.Audio.Playback;
+using Luma.SmartHub.Plugins.Youtube;
 
 namespace Luma.SmartHub.Audio.Bass.Tests
 {
@@ -11,13 +12,34 @@ namespace Luma.SmartHub.Audio.Bass.Tests
         static void Main(string[] args)
         {
             PlayOnAllDevices("http://czesio-w-it.2ap.pl/wp-content/uploads/2016/a.mp3");
+            //PlayPlaylist("");
             Console.ReadKey();
+        }
+
+        private static void PlayPlaylist(string url)
+        {
+            var playbackInfoProvider = new YoutubePlaybackInfoProvider();
+            var audioHub = new AudioHub(playbackInfoProvider);
+            
+            var allDevices = audioHub.Devices
+                .OfType<PlaybackAudioDevice>()
+                .ToArray();
+
+            var playbackUris = new YoutubePlaylistProvider().CreatePlaylist(new Uri(url));
+            var playback = new PlaylistPlayback(audioHub, playbackUris);
+
+            foreach (var playbackAudioDevice in allDevices)
+            {
+                playback.AddOutgoingConnection(playbackAudioDevice);
+            }
+
+            playback.CurrentTrack = playback.Tracks[15];
+            playback.Play();
         }
 
         private static void PlayOnAllDevices(string url)
         {
-            var playbackManager = new PlaybackManager(new IPlaybackInfoProvider[0]);
-            var audioHub = new AudioHub(playbackManager);
+            var audioHub = new AudioHub(new CompositePlaybackInfoProvider(new IPlaybackInfoProvider[0]));
 
             var allDevices = audioHub.Devices
                 .OfType<PlaybackAudioDevice>()

@@ -1,7 +1,7 @@
 $Location = Get-Location
 $Configuration = "Release"
 $SolutionFile = "src\Luma.SmartHub.Audio.Bass.sln"
-$NugetSources = "https://www.nuget.org/api/v2;https://ci.appveyor.com/nuget/luma-smarthub"
+$NugetSources = "https://www.nuget.org/api/v2;https://ci.appveyor.com/nuget/luma-smarthub;https://ci.appveyor.com/nuget/luma-smarthub-plugins-youtube"
 
 # Restore NuGet packages
 NuGet Restore $SolutionFile -Source $NugetSources
