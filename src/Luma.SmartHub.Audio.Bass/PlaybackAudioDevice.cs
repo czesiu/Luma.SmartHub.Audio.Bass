@@ -8,7 +8,17 @@ namespace Luma.SmartHub.Audio.Bass
 
         public double Volume
         {
-            get { return PlaybackDevice.Volume; }
+            get
+            {
+                try
+                {
+                    return PlaybackDevice.Volume;
+                }
+                catch
+                {
+                    return 0;
+                }
+            }
             set { PlaybackDevice.Volume = value; }
         }
 

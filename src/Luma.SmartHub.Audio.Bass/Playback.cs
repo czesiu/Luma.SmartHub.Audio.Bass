@@ -114,6 +114,13 @@ namespace Luma.SmartHub.Audio.Bass
                 Device = playbackDevice
             };
 
+            if (splitterChannel.Device != playbackDevice)
+            {
+                splitterChannel.Dispose();
+
+                throw new InvalidOperationException($"Cannot set outgoing connection for device {audioDevice}");
+            }
+
             foreach (var outputChannel in OutputChannels)
             {
                 outputChannel.Link(splitterChannel.Handle);

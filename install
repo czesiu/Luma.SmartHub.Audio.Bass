@@ -13,6 +13,7 @@ if [[ $cpuArchitecture == arm* ]]
 then
   zipUrls=(
     "http://www.un4seen.com/stuff/bass24-linux-arm.zip"
+    "http://www.un4seen.com/stuff/bass_aac-linux-arm.zip"
   )
   zipDirectory="hardfp"
 fi
@@ -39,6 +40,8 @@ for file in $(find . -maxdepth 1 -name "*.so"); do
   echo "Installing $file file ..."
 
   sudo cp $file /usr/local/lib
+
+  echo "/usr/local/lib/$file"
 
   sudo chmod a+rx /usr/local/lib/$file
 
