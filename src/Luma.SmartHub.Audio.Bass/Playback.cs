@@ -236,6 +236,9 @@ namespace Luma.SmartHub.Audio.Bass
 
         private void OnDownloadComplete()
         {
+            if (Name != null)
+                return;
+
             var tags = TagReader.Read(SourceChannel.Handle);
 
             Name = $"{tags.Artist} - {tags.Title}";
