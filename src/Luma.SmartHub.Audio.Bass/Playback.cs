@@ -7,11 +7,14 @@ using Luma.SmartHub.Audio.Playback;
 using ManagedBass;
 using ManagedBass.Mix;
 using ManagedBass.Tags;
+using Serilog;
 
 namespace Luma.SmartHub.Audio.Bass
 {
     public abstract class Playback : IPlayback, IDisposable
     {
+        protected readonly ILogger Logger = Log.ForContext<Playback>();
+
         public string Id { get; }
         public double? Duration { get; }
 
@@ -36,6 +39,8 @@ namespace Luma.SmartHub.Audio.Bass
         IEnumerable<IOutputAudioDevice> IPlayback.OutgoingConnections => OutgoingConnections;
 
         public event EventHandler Ended;
+
+        public event EventHandler Disposed;
 
         protected readonly List<Channel> OutputChannels = new List<Channel>();
 
@@ -135,19 +140,27 @@ namespace Luma.SmartHub.Audio.Bass
             {
                 var position = OutputChannels.Min(c => c.Position);
 
+                Logger.Debug("AddOutgoingConnection: MinPosition = {position}", position);
+
                 foreach (var outputChannel in OutputChannels)
                 {
                     outputChannel.Pause();
+
+                    Logger.Debug("AddOutgoingConnection: After pause for outputChannel device {device} position = {position}", outputChannel.Device, outputChannel.Position);
                 }
 
                 foreach (var outputChannel in OutputChannels)
                 {
+                    Logger.Debug("AddOutgoingConnection: Before updating position for outputChannel device {device} position = {position}", outputChannel.Device, outputChannel.Position);
+
                     // Set position few times, because sometimes once isn't working
                     var i = 5;
                     while (i-- > 0)
                     {
                         outputChannel.Position = position;
                     }
+
+                    Logger.Debug("AddOutgoingConnection: After updating position for outputChannel device {device} position = {position}", outputChannel.Device, outputChannel.Position);
                 }
 
                 Play();
@@ -215,6 +228,8 @@ namespace Luma.SmartHub.Audio.Bass
 
             SourceChannel.MediaEnded -= OnMediaEnded;
             SourceChannel.Dispose();
+
+            Disposed?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnDownloadComplete()

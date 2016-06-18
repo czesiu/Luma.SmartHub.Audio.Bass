@@ -4,12 +4,18 @@ using System.Linq;
 using ManagedBass;
 using Luma.SmartHub.Audio.Bass.Extensions;
 using Luma.SmartHub.Audio.Playback;
+using Serilog;
 
 namespace Luma.SmartHub.Audio.Bass
 {
-    public class AudioHub : IAudioHub
+    public class AudioHub : IAudioHub, IDisposable
     {
+        protected readonly ILogger Logger = Log.ForContext<AudioHub>();
+
         private readonly IPlaybackInfoProvider _playbackInfoProvider;
+        
+        private readonly List<Playback> _playbacks = new List<Playback>();
+
         private List<IAudioDevice> _devices;
         public IList<IAudioDevice> Devices
         {
@@ -43,7 +49,13 @@ namespace Luma.SmartHub.Audio.Bass
 
         public IUriPlayback CreatePlayback(Uri uri)
         {
-            return new UriPlayback(_playbackInfoProvider, uri);
+            var playback = new UriPlayback(_playbackInfoProvider, uri);
+
+            playback.Disposed += OnPlaybackDisposed;
+
+            _playbacks.Add(playback);
+
+            return playback;
         }
 
         private double? _volume;
@@ -92,6 +104,33 @@ namespace Luma.SmartHub.Audio.Bass
             {
                 playbackAudioDevice.Volume = volume;
             }
+        }
+        
+        private void OnPlaybackDisposed(object sender, EventArgs eventArgs)
+        {
+            var playback = (Playback) sender;
+
+            playback.Disposed -= OnPlaybackDisposed;
+
+            _playbacks.Remove(playback);
+        }
+
+        public void Dispose()
+        {
+            Logger.Debug("Disposing audio hub");
+
+            var count = _playbacks.Count;
+
+            foreach (var playback in _playbacks)
+            {
+                playback.Disposed -= OnPlaybackDisposed;
+
+                playback.Dispose();
+            }
+
+            _playbacks.Clear();
+
+            Logger.Debug("Disposed {count} playbacks", count);
         }
     }
 }
