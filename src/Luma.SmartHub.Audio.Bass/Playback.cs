@@ -18,10 +18,16 @@ namespace Luma.SmartHub.Audio.Bass
         public string Id { get; }
         public double? Duration { get; }
 
+        private double _volume = 1;
         public double Volume
         {
-            get { return SourceChannel.Volume; }
-            set { SourceChannel.Volume = value; }
+            get { return _volume; }
+            set
+            {
+                _volume = Math.Max(0, value);
+
+                OnVolumeChanged();
+            }
         }
 
         public double Position
@@ -77,6 +83,14 @@ namespace Luma.SmartHub.Audio.Bass
                 networkChannel.DownloadComplete += OnDownloadComplete;
             }
         }
+        
+        private void OnVolumeChanged()
+        {
+            foreach (var outputChannel in OutputChannels)
+            {
+                outputChannel.Volume = Volume;
+            }
+        }
 
         public void Play()
         {
@@ -116,7 +130,8 @@ namespace Luma.SmartHub.Audio.Bass
 
             var splitterChannel = new SplitChannel(SourceChannel)
             {
-                Device = playbackDevice
+                Device = playbackDevice,
+                Volume = Volume
             };
 
             if (splitterChannel.Device != playbackDevice)
@@ -146,7 +161,7 @@ namespace Luma.SmartHub.Audio.Bass
 
                     Logger.Debug("AddOutgoingConnection: After pause for outputChannel device {device} position = {position}", outputChannel.Device, outputChannel.Position);
                 }
-                
+
                 var position = OutputChannels.Min(c => c.Position);
 
                 Logger.Debug("AddOutgoingConnection: MinPosition = {position}", position);
@@ -168,14 +183,14 @@ namespace Luma.SmartHub.Audio.Bass
                 Play();
             }
         }
-        
+
         public string Write()
         {
             var result = $"Position = {SourceChannel.Position}\n";
 
             foreach (var outputChannel in OutputChannels)
             {
-                result += $"Position = {outputChannel.Position}\n";
+                result += $"Position = {outputChannel.Position}, Volume = {outputChannel.Volume}\n";
             }
 
             return result;
@@ -204,7 +219,7 @@ namespace Luma.SmartHub.Audio.Bass
         public void Dispose()
         {
             Stop();
-            
+
             foreach (var outputChannel1 in OutputChannels.ToArray())
             {
                 foreach (var outputChannel2 in OutputChannels)
