@@ -119,8 +119,6 @@ namespace Luma.SmartHub.Audio.Bass
         {
             Logger.Debug("Disposing audio hub");
 
-            var count = _playbacks.Count;
-
             foreach (var playback in _playbacks)
             {
                 playback.Disposed -= OnPlaybackDisposed;
@@ -128,9 +126,18 @@ namespace Luma.SmartHub.Audio.Bass
                 playback.Dispose();
             }
 
+            Logger.Debug("Disposed {count} playbacks", _playbacks.Count);
+
             _playbacks.Clear();
 
-            Logger.Debug("Disposed {count} playbacks", count);
+            foreach (var audioDevice in Devices)
+            {
+                ((IDisposable)audioDevice).Dispose();
+            }
+
+            Logger.Debug("Disposed {count} audio devices", _devices.Count);
+
+            _devices.Clear();
         }
     }
 }

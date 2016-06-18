@@ -1,8 +1,9 @@
-﻿using ManagedBass;
+﻿using System;
+using ManagedBass;
 
 namespace Luma.SmartHub.Audio.Bass
 {
-    public class PlaybackAudioDevice : AudioDevice, IOutputAudioDevice
+    public class PlaybackAudioDevice : AudioDevice, IOutputAudioDevice, IDisposable
     {
         public PlaybackDevice PlaybackDevice { get; set; }
 
@@ -31,6 +32,14 @@ namespace Luma.SmartHub.Audio.Bass
                    $"IsDefault = {DeviceInfo.IsDefault}\n" +
                    $"IsEnabled = {DeviceInfo.IsEnabled}\n" +
                    $"IsInitialized = {DeviceInfo.IsInitialized}";
+        }
+
+        public void Dispose()
+        {
+            if (PlaybackDevice.DeviceInfo.IsInitialized)
+            {
+                PlaybackDevice.Dispose();
+            }
         }
     }
 }
