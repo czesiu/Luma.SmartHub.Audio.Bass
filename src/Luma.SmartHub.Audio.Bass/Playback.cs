@@ -138,16 +138,18 @@ namespace Luma.SmartHub.Audio.Bass
 
             if (IsPlaying)
             {
-                var position = OutputChannels.Min(c => c.Position);
-
-                Logger.Debug("AddOutgoingConnection: MinPosition = {position}", position);
-
                 foreach (var outputChannel in OutputChannels)
                 {
+                    Logger.Debug("AddOutgoingConnection: Before pause for outputChannel device {device} position = {position}", outputChannel.Device, outputChannel.Position);
+
                     outputChannel.Pause();
 
                     Logger.Debug("AddOutgoingConnection: After pause for outputChannel device {device} position = {position}", outputChannel.Device, outputChannel.Position);
                 }
+                
+                var position = OutputChannels.Min(c => c.Position);
+
+                Logger.Debug("AddOutgoingConnection: MinPosition = {position}", position);
 
                 foreach (var outputChannel in OutputChannels)
                 {
