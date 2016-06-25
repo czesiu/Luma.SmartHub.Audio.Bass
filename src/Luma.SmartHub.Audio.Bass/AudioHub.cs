@@ -11,6 +11,8 @@ namespace Luma.SmartHub.Audio.Bass
     public class AudioHub : IAudioHub, IDisposable
     {
         protected readonly ILogger Logger = Log.ForContext<AudioHub>();
+        
+        private int _bassAacHandle;
 
         private readonly IPlaybackInfoProvider _playbackInfoProvider;
         
@@ -45,6 +47,15 @@ namespace Luma.SmartHub.Audio.Bass
         public AudioHub(IPlaybackInfoProvider playbackInfoProvider)
         {
             _playbackInfoProvider = playbackInfoProvider;
+
+            Initialize();
+        }
+
+        private void Initialize()
+        {
+            _bassAacHandle = ManagedBass.Bass.PluginLoad("libbass_aac.so");
+
+            Logger.Debug("Initialized plugin 'bass_aac' with handle: {handle}", _bassAacHandle);
         }
 
         public IUriPlayback CreatePlayback(Uri uri)
@@ -58,7 +69,9 @@ namespace Luma.SmartHub.Audio.Bass
             return playback;
         }
 
+
         private double? _volume;
+
         public double Volume
         {
             get
@@ -138,6 +151,13 @@ namespace Luma.SmartHub.Audio.Bass
             Logger.Debug("Disposed {count} audio devices", _devices.Count);
 
             _devices.Clear();
+
+            if (_bassAacHandle != 0)
+            {
+                ManagedBass.Bass.PluginFree(_bassAacHandle);
+
+                Logger.Debug("Disposed 'bass_acc' plugin: {status}",  ManagedBass.Bass.LastError);
+            }
         }
     }
 }
