@@ -18,26 +18,31 @@ namespace Luma.SmartHub.Audio.Bass
         
         private readonly List<Playback> _playbacks = new List<Playback>();
 
+        private readonly object _lock = new object();
+
         private List<IAudioDevice> _devices;
         public IList<IAudioDevice> Devices
         {
             get
             {
-                if (_devices == null)
+                lock (_lock)
                 {
-                    _devices = new List<IAudioDevice>();
+                    if (_devices == null)
+                    {
+                        _devices = new List<IAudioDevice>();
 
-                    var playbackDevices = PlaybackDevice.Devices
-                        .Where(c => c.DeviceInfo.IsEnabled)
-                        .Where(c => c != PlaybackDevice.NoSoundDevice)
-                        .Select(AudioDeviceExtensions.ToAudioDevice);
+                        var playbackDevices = PlaybackDevice.Devices
+                            .Where(c => c.DeviceInfo.IsEnabled)
+                            .Where(c => c != PlaybackDevice.NoSoundDevice)
+                            .Select(AudioDeviceExtensions.ToAudioDevice);
 
-                    var recordingDevices = RecordingDevice.Devices
-                        .Where(c => c.DeviceInfo.IsEnabled)
-                        .Select(AudioDeviceExtensions.ToAudioDevice);
+                        var recordingDevices = RecordingDevice.Devices
+                            .Where(c => c.DeviceInfo.IsEnabled)
+                            .Select(AudioDeviceExtensions.ToAudioDevice);
 
-                    _devices.AddRange(playbackDevices);
-                    _devices.AddRange(recordingDevices);
+                        _devices.AddRange(playbackDevices);
+                        _devices.AddRange(recordingDevices);
+                    }
                 }
 
                 return _devices;
